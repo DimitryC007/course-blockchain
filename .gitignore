@@ -1,0 +1,48 @@
+# Node modules
+node_modules/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
+.env
+
+# Production build
+/build/
+
+# Dependency directories
+/bin/
+/lib/
+/typings/
+
+# Editor directories and files
+.idea/
+.vscode/
+
+# User-specific files
+*.sublime-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Compiled Python files
+*.pyc
+
+# Compiled TypeScript files
+*.js.map
+
+# Environment variables file
+.env
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
