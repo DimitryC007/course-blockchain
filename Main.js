@@ -55,8 +55,12 @@ const lightWallet3 = new LightWallet(blockChain, wallet3);
 // Add the new block to the blockchain
 blockChain.addBlock(initialBlock);
 
-const transaction = lightWallet2.sendFunds(lightWallet3.address, 20);
-const newBlock = new Block(Date.now(), [transaction], merkleRoot);
+const transaction1 = lightWallet2.sendFunds(wallet1.address, 30);
+const transaction2 = lightWallet3.sendFunds(wallet1.address, 20);
+const transaction3 = lightWallet3.sendFunds(lightWallet2.address, 10);
+const transaction4 = lightWallet2.sendFunds(lightWallet3.address, 60);
+
+const newBlock = new Block(Date.now(), [transaction1,transaction2,transaction3,transaction4], merkleRoot);
 blockChain.addBlock(newBlock);
 
 // Print the blockchain
