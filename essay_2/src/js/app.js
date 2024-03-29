@@ -1,7 +1,7 @@
 App = {
   web3Provider: null,
   contracts: {},
-  account: '0x0',
+  account: "0x0",
   hasVoted: false,
 
   init: function () {
@@ -10,7 +10,7 @@ App = {
 
   initWeb3: function () {
     // TODO: refactor conditional
-    if (typeof web3 !== 'undefined') {
+    if (typeof web3 !== "undefined") {
       // If a web3 instance is already provided by Meta Mask.
       const ethEnabled = () => {
         if (window.ethereum) {
@@ -21,7 +21,7 @@ App = {
       };
       if (!ethEnabled()) {
         alert(
-          'Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!'
+          "Please install an Ethereum-compatible browser or extension like MetaMask to use this dApp!"
         );
       }
       web3 = window.web3;
@@ -29,7 +29,7 @@ App = {
     } else {
       // Specify default instance if no web3 instance provided
       App.web3Provider = new Web3.providers.HttpProvider(
-        'http://localhost:7545'
+        "http://localhost:7545"
       );
       web3 = new Web3(App.web3Provider);
     }
@@ -37,7 +37,7 @@ App = {
   },
 
   initContract: function () {
-    $.getJSON('Election.json', function (election) {
+    $.getJSON("Election.json", function (election) {
       // Instantiate a new truffle contract from the artifact
       App.contracts.Election = TruffleContract(election);
       // Connect provider to interact with contract
@@ -60,11 +60,11 @@ App = {
           {},
           {
             fromBlock: 0,
-            toBlock: 'latest',
+            toBlock: "latest",
           }
         )
         .watch(function (error, event) {
-          console.log('event triggered', event);
+          console.log("event triggered", event);
           // Reload when a new vote is recorded
           App.render();
         });
@@ -73,8 +73,8 @@ App = {
 
   render: async () => {
     var electionInstance;
-    var loader = $('#loader');
-    var content = $('#content');
+    var loader = $("#loader");
+    var content = $("#content");
 
     loader.show();
     content.hide();
@@ -82,10 +82,10 @@ App = {
     // Load account data
     try {
       const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
+        method: "eth_requestAccounts",
       });
       App.account = accounts[0];
-      $('#accountAddress').html('Your Account: ' + App.account);
+      $("#accountAddress").html("Your Account: " + App.account);
     } catch (error) {
       if (error.code === 4001) {
         // User rejected request
@@ -106,10 +106,10 @@ App = {
         }
 
         const candidates = await Promise.all(promise);
-        var candidatesResults = $('#candidatesResults');
+        var candidatesResults = $("#candidatesResults");
         candidatesResults.empty();
 
-        var candidatesSelect = $('#candidatesSelect');
+        var candidatesSelect = $("#candidatesSelect");
         candidatesSelect.empty();
 
         for (var i = 0; i < candidatesCount; i++) {
@@ -119,18 +119,18 @@ App = {
 
           // Render candidate Result
           var candidateTemplate =
-            '<tr><th>' +
+            "<tr><th>" +
             id +
-            '</th><td>' +
+            "</th><td>" +
             name +
-            '</td><td>' +
+            "</td><td>" +
             voteCount +
-            '</td></tr>';
+            "</td></tr>";
           candidatesResults.append(candidateTemplate);
 
           // Render candidate ballot option
           var candidateOption =
-            "<option value='" + id + "' >" + name + '</ option>';
+            "<option value='" + id + "' >" + name + "</ option>";
           candidatesSelect.append(candidateOption);
         }
         return electionInstance.voters(App.account);
@@ -138,9 +138,8 @@ App = {
       .then(function (hasVoted) {
         // Do not allow a user to vote
         if (hasVoted) {
-          $('form').hide();
-        }
-        else{
+          $("form").hide();
+        } else {
           App.preVoteTimer();
         }
         loader.hide();
@@ -151,78 +150,80 @@ App = {
       });
   },
 
-  preVoteTimer:function()
-  {
-      let timeLeft = 2;
+  preVoteTimer: function () {
+    let timeLeft = 30;
 
-      // Get the element where the timer will be rendered
-      const timerElement = $('#timer');
-      const voteBtn = $('#vote-btn');
-      const timerLabel = $('#timer-label');
-      timerLabel.text('Get ready to vote.');
+    // Get the element where the timer will be rendered
+    const timerElement = $("#timer");
+    const voteBtn = $("#vote-btn");
+    const timerLabel = $("#timer-label");
+    timerLabel.text("Get ready to vote.");
 
-      voteBtn.prop("disabled",true);
+    voteBtn.prop("disabled", true);
 
-      // Function to update the timer and render it on the screen
-      function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        const seconds = (timeLeft % 60).toString().padStart(2, '0');
-        
-        timerElement.text(`${minutes}:${seconds}`);
-        timeLeft--;
+    // Function to update the timer and render it on the screen
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (timeLeft % 60).toString().padStart(2, "0");
 
-        // Perform an action when the timer reaches 0
-        if (timeLeft < 0) {
-          clearInterval(timerInterval);
-          App.VoteTimer();
-        }
+      timerElement.text(`${minutes}:${seconds}`);
+      timeLeft--;
+
+      // Perform an action when the timer reaches 0
+      if (timeLeft < 0) {
+        clearInterval(timerInterval);
+        App.VoteTimer();
       }
+    }
 
-      // Update the timer every second
-      const timerInterval = setInterval(updateTimer, 1000);
+    // Update the timer every second
+    const timerInterval = setInterval(updateTimer, 1000);
   },
 
-  VoteTimer:function()
-  {
-      let timeLeft = 4;
-      const timerLabel = $('#timer-label');
-      timerLabel.text('You can vote now');
-      const timerElement = $('#timer');
-      const voteBtn = $('#vote-btn');
+  VoteTimer: function () {
+    let timeLeft = 60;
+    const timerLabel = $("#timer-label");
+    timerLabel.text("You can vote now");
+    const timerElement = $("#timer");
+    const voteBtn = $("#vote-btn");
 
-      voteBtn.prop("disabled",false);
+    voteBtn.prop("disabled", false);
 
-      // Function to update the timer and render it on the screen
-      function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-        const seconds = (timeLeft % 60).toString().padStart(2, '0');
-        
-        timerElement.text(`${minutes}:${seconds}`);
-        timeLeft--;
+    // Function to update the timer and render it on the screen
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60)
+        .toString()
+        .padStart(2, "0");
+      const seconds = (timeLeft % 60).toString().padStart(2, "0");
 
-        // Perform an action when the timer reaches 0
-        if (timeLeft < 0) {
-          clearInterval(timerInterval);
-          timerLabel.text('Elections closed');
-          timerElement.text('');
-          voteBtn.prop("disabled",true);
-        }
+      timerElement.text(`${minutes}:${seconds}`);
+      timeLeft--;
+
+      // Perform an action when the timer reaches 0
+      if (timeLeft < 0) {
+        clearInterval(timerInterval);
+        timerLabel.text("Elections closed");
+        timerElement.text("");
+        voteBtn.prop("disabled", true);
       }
+    }
 
-      // Update the timer every second
-      const timerInterval = setInterval(updateTimer, 1000);
+    // Update the timer every second
+    const timerInterval = setInterval(updateTimer, 1000);
   },
 
   castVote: function () {
-    var candidateId = $('#candidatesSelect').val();
+    var candidateId = $("#candidatesSelect").val();
     App.contracts.Election.deployed()
       .then(function (instance) {
         return instance.vote(candidateId, { from: App.account });
       })
       .then(function (result) {
         // Wait for votes to update
-        $('#content').hide();
-        $('#loader').show();
+        $("#content").hide();
+        $("#loader").show();
       })
       .catch(function (err) {
         console.error(err);
