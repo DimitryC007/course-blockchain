@@ -1,3 +1,6 @@
+const ELECTION_OPTIONS_KEY = "electionOptions";
+let isTimerLoaded = false;
+let candidatesCounter = 0;
 App = {
   web3Provider: null,
   contracts: {},
@@ -139,8 +142,12 @@ App = {
         // Do not allow a user to vote
         if (hasVoted) {
           $("form").hide();
-        } else {
-          App.preVoteTimer();
+        } else{
+          if(!isTimerLoaded)
+          {
+            App.preVoteTimer();
+            isTimerLoaded = true;
+          }
         }
         loader.hide();
         content.show();
@@ -151,15 +158,39 @@ App = {
   },
 
   preVoteTimer: function () {
-    let timeLeft = 30;
+    $("form").hide();
+    const electionsOptions = localStorage.getItem(ELECTION_OPTIONS_KEY);
+    if (!electionsOptions) return;
+
+    const { start, duration } = JSON.parse(electionsOptions);
+
+    if(isNaN(Date.parse(start)) || duration == undefined || duration == null || duration <= 0)
+      return;
+
+    const startDate = new Date(start);
+    const endDate = new Date(start);
+    const currentDate = new Date();
+
+    endDate.setMinutes(endDate.getMinutes() + duration);
+
+    if (endDate < currentDate) return; // elections ended
+
+    if(currentDate > startDate) //ongoing elections
+    {
+      const diffMilliseconds = endDate - currentDate;
+      let seconds = Math.floor((diffMilliseconds / 1000));
+      App.VoteTimer(seconds);
+      return;
+    }
 
     // Get the element where the timer will be rendered
+    let timeLeft = Math.abs(Math.floor((currentDate - startDate) / 1000));
     const timerElement = $("#timer");
-    const voteBtn = $("#vote-btn");
+    //const voteBtn = $("#vote-btn");
     const timerLabel = $("#timer-label");
     timerLabel.text("Get ready to vote.");
 
-    voteBtn.prop("disabled", true);
+    //voteBtn.prop("disabled", true);
 
     // Function to update the timer and render it on the screen
     function updateTimer() {
@@ -174,7 +205,7 @@ App = {
       // Perform an action when the timer reaches 0
       if (timeLeft < 0) {
         clearInterval(timerInterval);
-        App.VoteTimer();
+        App.VoteTimer(duration);
       }
     }
 
@@ -182,14 +213,16 @@ App = {
     const timerInterval = setInterval(updateTimer, 1000);
   },
 
-  VoteTimer: function () {
-    let timeLeft = 60;
+  VoteTimer: function (seconds) {
+    let timeLeft = seconds;
     const timerLabel = $("#timer-label");
     timerLabel.text("You can vote now");
     const timerElement = $("#timer");
-    const voteBtn = $("#vote-btn");
+    //const voteBtn = $("#vote-btn");
 
-    voteBtn.prop("disabled", false);
+    //voteBtn.prop("disabled", false);
+
+    $("form").show();
 
     // Function to update the timer and render it on the screen
     function updateTimer() {
@@ -206,7 +239,9 @@ App = {
         clearInterval(timerInterval);
         timerLabel.text("Elections closed");
         timerElement.text("");
-        voteBtn.prop("disabled", true);
+        //voteBtn.prop("disabled", true);
+        $("form").hide();
+        App.showElectionsResult();
       }
     }
 
@@ -229,6 +264,112 @@ App = {
         console.error(err);
       });
   },
+
+  electionsCreator: function () {
+    const electionsStorage = localStorage.getItem(ELECTION_OPTIONS_KEY);
+
+    // Check if there are ongoing elections
+    if (electionsStorage) {
+      const { start, duration } = JSON.parse(electionsStorage);
+      const end = new Date(start);
+      end.setMinutes(end.getMinutes() + parseInt(duration));
+
+      if (end > new Date()) {
+        alert("Cannot create a new election while there is an ongoing one.");
+        return;
+      }
+    }
+
+    const start = $("#elections-start-date-time").val();
+    const duration = parseInt($("#elections-duration").val());
+
+    if (!start || duration <= 0) {
+      alert("Fill date or duration");
+      return;
+    }
+
+    const electionsOptions = {
+      start,
+      duration,
+    };
+
+    localStorage.setItem(
+      ELECTION_OPTIONS_KEY,
+      JSON.stringify(electionsOptions)
+    );
+
+    //reset
+    $("#elections-start-date-time").val('');
+    $("#elections-duration").val('');
+    //timer
+    App.preVoteTimer();
+  },
+
+  // addCandidate: function()
+  // {
+  //   const id = candidatesCounter++;
+  //   const candidateHtml = `<div class="candidate-${id}-div"><input id="candidate-${id}" type="text"><button onclick="App.sendCandidateToElections('candidate-${id}')" style='margin:4px'>Send candidate to elections</button></div>`;
+  //   $('.candidates-container').append(candidateHtml);
+  // },
+
+  // sendCandidateToElections: function(candidateId)
+  // {
+
+  //   const candidateDiv = $(`.candidates-container .${candidateId}-div`);
+  //   const candidateInput = $(`.candidates-container #${candidateId}`);
+
+  //   if(!candidateInput || candidateInput.val().trim() == "")
+  //     alert("you must give a name to cantidate");
+
+  //   App.contracts.Election.deployed()
+  //     .then(function (instance) {
+  //       return instance.addCandidate(candidateInput.val());
+  //     })
+  //     .then(function (result) {
+  //       candidateDiv.hide();
+  //     })
+  //     .catch(function (err) {
+  //       console.error(err);
+  //     });
+  // }
+  showElectionsResult: function()
+  {
+    App.contracts.Election.deployed()
+    .then(function (instance) {
+      electionInstance = instance;
+      return electionInstance.candidatesCount();
+    })
+    .then(async (candidatesCount) => {
+      const promise = [];
+      for (var i = 1; i <= candidatesCount; i++) {
+        promise.push(electionInstance.candidates(i));
+      }
+
+      const candidates = await Promise.all(promise);
+      const electionsResult = $('#electionsResult');
+
+      const sortedCandidates = candidates.sort((a,b)=>(parseInt(b[2])-parseInt(a[2])));
+
+      for (var i = 0; i < candidatesCount; i++) {
+        var id = sortedCandidates[i][0];
+        var name = sortedCandidates[i][1];
+        var voteCount = parseInt(sortedCandidates[i][2]);
+
+        // Render candidate Result
+        var candidateTemplate =
+          "<tr><th>" +
+          id +
+          "</th><td>" +
+          name +
+          "</td><td>" +
+          voteCount +
+          "</td></tr>";
+          
+        electionsResult.append(candidateTemplate);
+      }
+      $('#elections-result').show();
+    });
+  }
 };
 
 $(function () {

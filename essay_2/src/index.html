@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Election Results</title>
+    <title>Elections</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -18,10 +18,39 @@
     <![endif]-->
   </head>
   <body>
-    <div class="container" style="width: 650px;">
-      <div class="row">
+    <div class="container" style="padding-top:30px;width: 900px;display: flex;justify-content: space-between;height: 100%;">
+      <div style="border: 1px solid;">
+        <div>
+          <h1 class="text-center">Admin</h1>
+          <hr/>
+          <br/>
+          <!-- <div style="padding:8px 0">Select elections candidates (at least 2 candidates)</div>
+          <button onclick="App.addCandidate()">Add candidate (+)</button>
+          <div class="candidates-container"></div> -->
+          <div style="padding:8px 0">Select elections date time</div>
+          <div class="col-lg-12" style="display: flex;margin-bottom: 10px;">  
+            <label>Start:</label>
+            <input
+            style="margin-right: 8px;"
+              type="datetime-local"
+              id="elections-start-date-time"
+              name="start elections time"/>
+          </div>
+
+          <div class="col-lg-12">
+            <div>
+              <label>Enter election duration in minutes</label>
+              <input id="elections-duration" type="number"/>
+            </div>
+            
+            <button type="button" onclick="App.electionsCreator()">Create elections</button>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="border: 1px solid;">
         <div class="col-lg-12">
-          <h1 class="text-center">Election Results</h1>
+          <div>
+          <h1 class="text-center">Local Elections</h1>
           <hr/>
           <br/>
           <h3 id="timer-label" style="text-align: center;"></h3>
@@ -53,6 +82,23 @@
             </form>
             <p id="accountAddress" class="text-center"></p>
           </div>
+        </div>
+        <div id="elections-result" style="display: none;">
+          <h1 class="text-center">Elections result</h1>
+          <hr/>
+          <br/>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Votes</th>
+              </tr>
+            </thead>
+            <tbody id="electionsResult">
+            </tbody>
+          </table>
+        </div>
         </div>
       </div>
     </div>
