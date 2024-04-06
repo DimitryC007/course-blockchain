@@ -263,6 +263,7 @@ App = {
         // Wait for votes to update
         $("#content").hide();
         $("#loader").show();
+        // todo: save voter here
       })
       .catch(function (err) {
         console.error(err);
