@@ -1,36 +1,38 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <=0.8.12;
+pragma solidity 0.4.20;
 
 contract Election {
     // Model a Candidate
     struct Candidate {
-        uint256 id;
+        uint id;
         string name;
-        uint256 voteCount;
+        uint voteCount;
     }
 
     // Store accounts that have voted
     mapping(address => bool) public voters;
     // Store Candidates
     // Fetch Candidate
-    mapping(uint256 => Candidate) public candidates;
+    mapping(uint => Candidate) public candidates;
     // Store Candidates Count
-    uint256 public candidatesCount;
+    uint public candidatesCount;
 
     // voted event
-    event votedEvent(uint256 indexed _candidateId);
+    event votedEvent (
+        uint indexed _candidateId
+    );
 
-    constructor() public {
-        addCandidate("Candidate 1");
-        addCandidate("Candidate 2");
+    function Election () public {
+    addCandidate("Biden");
+    addCandidate("Trump");
     }
 
-    function addCandidate(string memory _name) private {
-        candidatesCount++;
+    function addCandidate (string memory _name) public {
+        candidatesCount ++;
         candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
     }
 
-    function vote(uint256 _candidateId) public {
+    function vote (uint _candidateId) public {
         // require that they haven't voted before
         require(!voters[msg.sender]);
 
@@ -41,9 +43,9 @@ contract Election {
         voters[msg.sender] = true;
 
         // update candidate vote Count
-        candidates[_candidateId].voteCount++;
+        candidates[_candidateId].voteCount ++;
 
         // trigger voted event
-        emit votedEvent(_candidateId);
+        votedEvent(_candidateId);
     }
 }

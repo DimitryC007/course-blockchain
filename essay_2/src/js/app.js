@@ -1,6 +1,9 @@
 const ELECTION_OPTIONS_KEY = "electionOptions";
+const CANDIDATES_STORAGE = 'candidates_data';
 let isTimerLoaded = false;
 let candidatesCounter = 0;
+
+
 App = {
   web3Provider: null,
   contracts: {},
@@ -40,6 +43,7 @@ App = {
   },
 
   initContract: function () {
+    
     $.getJSON("Election.json", function (election) {
       // Instantiate a new truffle contract from the artifact
       App.contracts.Election = TruffleContract(election);
@@ -135,7 +139,7 @@ App = {
           var candidateOption =
             "<option value='" + id + "' >" + name + "</ option>";
           candidatesSelect.append(candidateOption);
-        }
+        };
         return electionInstance.voters(App.account);
       })
       .then(function (hasVoted) {
@@ -304,34 +308,20 @@ App = {
     //timer
     App.preVoteTimer();
   },
-
-  // addCandidate: function()
-  // {
-  //   const id = candidatesCounter++;
-  //   const candidateHtml = `<div class="candidate-${id}-div"><input id="candidate-${id}" type="text"><button onclick="App.sendCandidateToElections('candidate-${id}')" style='margin:4px'>Send candidate to elections</button></div>`;
-  //   $('.candidates-container').append(candidateHtml);
-  // },
-
-  // sendCandidateToElections: function(candidateId)
-  // {
-
-  //   const candidateDiv = $(`.candidates-container .${candidateId}-div`);
-  //   const candidateInput = $(`.candidates-container #${candidateId}`);
-
-  //   if(!candidateInput || candidateInput.val().trim() == "")
-  //     alert("you must give a name to cantidate");
-
-  //   App.contracts.Election.deployed()
-  //     .then(function (instance) {
-  //       return instance.addCandidate(candidateInput.val());
-  //     })
-  //     .then(function (result) {
-  //       candidateDiv.hide();
-  //     })
-  //     .catch(function (err) {
-  //       console.error(err);
-  //     });
-  // }
+  sendCandidateToElections: function() {
+    var candidateName = $("#new-candidate").val();
+    App.contracts.Election.deployed()
+      .then(function (instance) {
+        return instance.addCandidate(candidateName, { from: App.account });
+      })
+      .then(function (result) {
+        $("#content").hide();
+        App.render();
+      })
+      .catch(function (err) {
+        console.error(err);
+      });
+  },
   showElectionsResult: function()
   {
     App.contracts.Election.deployed()
@@ -369,8 +359,10 @@ App = {
       }
       $('#elections-result').show();
     });
-  }
+  },
 };
+
+
 
 $(function () {
   $(window).load(function () {

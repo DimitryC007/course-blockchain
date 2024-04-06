@@ -24,10 +24,17 @@
           <h1 class="text-center">Admin</h1>
           <hr/>
           <br/>
-          <!-- <div style="padding:8px 0">Select elections candidates (at least 2 candidates)</div>
-          <button onclick="App.addCandidate()">Add candidate (+)</button>
-          <div class="candidates-container"></div> -->
-          <div style="padding:8px 0">Select elections date time</div>
+          <div>
+            <h3 style="padding:8px 0">add candidates</h3>
+            <div style="padding:8px 0">input candidate name:</div>
+              <input style="margin-right: 8px;"
+              type="text"
+              id="new-candidate"
+              name="candidate-input-box"/>
+              <button onclick="App.sendCandidateToElections(); return false;">Add candidate</button>
+              <div class="candidates-container"></div>
+          </div>
+          <h3 style="padding:8px 0">Select elections date time</h3>
           <div class="col-lg-12" style="display: flex;margin-bottom: 10px;">  
             <label>Start:</label>
             <input
